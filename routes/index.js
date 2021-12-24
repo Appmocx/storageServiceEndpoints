@@ -34,12 +34,7 @@ router.post("/file", async function (req, res, next) {
 
 router.get("/getAllFile", async function (req, res, next) {
   const getAllObj = await s3Obj.getAllFile();
-  let getAllObjName = await getAllObj["Contents"].map((obj) => {
-    let rObj = {};
-    rObj["Name"] = obj["Key"];
-    return rObj;
-  });
-  res.send(getAllObjName);
+  res.send( getAllObj["Contents"]);
 });
 
 router.post("/downloadFile", async function (req, res, next) {
