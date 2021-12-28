@@ -2,13 +2,14 @@ var express = require("express");
 var s3 = require("storageservice").S3Storage;
 var f = require("storageservice");
 var router = express.Router();
+var env = require('dotenv').config();
 
 const bucketOptions = {
-  bucketName: "appmocxfiles",
-  accessKeyId: "AKIAZUMMZEDGCCTLVBRT",
-  secretAccessKey: "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",
+  bucketName:process.env.bucket_name,
+  accessKeyId: process.env.access_key_id,
+  secretAccessKey:  process.env.secret_access_key,
 };
-
+// console.log(process.env.access_key_id)
 const s3Obj = new s3(bucketOptions);
 
 /* GET home page. */
@@ -25,16 +26,21 @@ router.post("/file", async function (req, res, next) {
     content: uploadedFile["data"],
     extension: "png",
   };
+  // console.log("file",req.body)
+  if(req.body.folder){
+    file['name'] =req.body.folder + "/"+  uploadedFile["name"]
+  }
   const opt = {
     acl: "public-read",
   };
+  // console.log("file",file)
   const upload = await s3Obj.uploadFileObject(file, opt);
   res.send(upload);
 });
 
 router.get("/getAllFile", async function (req, res, next) {
-  const getAllObj = await s3Obj.getAllFile();
-  res.send( getAllObj["Contents"]);
+  const getAllObj = await s3Obj.getAllFile()
+  res.send( getAllObj);
 });
 
 router.post("/downloadFile", async function (req, res, next) {
@@ -53,6 +59,26 @@ router.post("/deleteFile", async function (req, res, next) {
   const deleteFile = await s3Obj.deleteFile(params);
 
   res.send(deleteFile);
+});
+
+router.post("/createFolder", async function (req, res, next) {
+  let folderPath =  req.body.key +"/"
+  let params = {
+    key: folderPath,
+  };
+  const createFolder = await s3Obj.createFolder(params);
+
+  res.send(createFolder);
+});
+
+router.post("/getFolderContent", async function (req, res, next) {
+  let folderPath =  req.body.key +"/"
+  let params = {
+    folderPath: folderPath,
+  };
+  const getFolderContent = await s3Obj.getCurrentFolder(params);
+
+  res.send(getFolderContent);
 });
 
 module.exports = router;
