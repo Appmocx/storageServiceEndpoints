@@ -38,8 +38,15 @@ router.post("/file", async function (req, res, next) {
   res.send(upload);
 });
 
-router.get("/getAllFile", async function (req, res, next) {
-  const getAllObj = await s3Obj.getAllFile()
+router.post("/getAllFile", async function (req, res, next) {
+  let data = {
+    prefix:req.body.prefix,
+    file:req.body.file ,
+    folder:req.body.folder 
+  }
+
+ 
+  const getAllObj = await s3Obj.getFileContent(data).catch((err)=>{console.log("err",err)})
   res.send( getAllObj);
 });
 
